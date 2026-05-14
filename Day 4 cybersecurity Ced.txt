@@ -1,0 +1,217 @@
+Experience real world hacking
+
+http://192.168.101.226/mutillidae/src/index.php
+
+Classic 139/445 netbios attack/ how to steal file /locally
+Hackers:
+cmd
+net use x: /delete
+net use s: /delete
+
+initial access: net use \\10.k.1.10\c$ /user:administrator
+
+Victims: netstat -ano | findstr :445
+
+
+-----
+
+config t
+NO ip access-list standard NOPORN
+ip access-list standard NOPORN
+DENY 66.254.0.0 0.0.255.255
+deny 161.49.0.0 0.0.255.255
+DENY 104.21.0.0 0.0.255.255
+DENY 68.235.0.0 0.0.255.255
+DENY 104.17.0.0 0.0.255.255
+DENY 88.208.0.0 0.0.255.255
+DENY 208.77.0.0 0.0.255.255
+DENY 172.67.0.0 0.0.255.255
+DENY 185.53.0.0 0.0.255.255
+Permit Any
+Int Gi 1
+ ip access-group NOPORN in
+end
+Goberno: allow all Porn, for freedom of expression!
+config t
+Int gi 1
+ NO ip access-group NOPORN in
+end
+
+Alternative: use standard ACL 1-99
+config t
+no access-list 25
+access-list 25 DENY 66.254.0.0 0.0.255.255
+access-list 25 DENY 104.21.0.0 0.0.255.255
+access-list 25 DENY 68.235.0.0 0.0.255.255
+access-list 25 DENY 104.17.0.0 0.0.255.255
+access-list 25 DENY 88.208.0.0 0.0.255.255
+access-list 25 DENY 208.77.0.0 0.0.255.255
+access-list 25 DENY 172.67.0.0 0.0.255.255
+access-list 25 DENY 185.53.0.0 0.0.255.255
+access-list 25 permit Any
+Int gi 1
+ ip access-group 25 in
+end
+Goberno: allow all Porn, for freedom of expression!
+config t
+Int gi 1
+ NO ip access-group 69 in
+end
+
+
+config t
+NO ip access-list standard NOISKUL
+ip access-list standard NOISKUL
+DENY   185.158.133.1   0.0.255.255
+DENY   172.66.161.211  0.0.255.255
+DENY   45.60.35.246  0.0.255.255
+DENY   45.60.35.246   0.0.255.255
+DENY   45.60.35.246   0.0.255.255
+Permit Any
+Int Gi 1
+ ip access-group NOISKUL in
+end
+
+
+config t
+NO ip access-list standard NOTORS
+ip access-list standard NOTORS
+DENY   18.223.197.26   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+DENY   __.__.__.__   0.0.255.255
+
+
+Permit Any
+Int Gi 1
+ ip access-group NOTORS in
+end
+
+
+Freedom:
+Int Gi 1
+ ip access-group NOTORS in
+end
+
+------------
+
+
+ex.1: you are the Blue Team/SOC guys for pogo sites:
+ebet10.com open only http, https, ping:  80, 443, icmp
+ebet11.com open only dns, https, ssh     53, 443, 22 ==> 6 lines:
+  GOLDEN  FIREWALL FORMULA:  paloalto,fortinet,cisco,checkpoint.
+   protocol         hacker    victim       port
+tcp,udp,icmp,IP     Any      web310/11
+Config t
+No ip access-list extended FP1
+ip access-list extended FP1
+permit tcp any host bet10.com eq 80
+permit tcp any host bet10.com eq 443
+permit icmp any host bet10.com
+permit tcp any host bet11.com eq 53
+permit tcp any host bet11.com eq 443
+permit tcp any host bet11.com eq 22
+end
+config t
+int gi 3
+ No ip access-group FP1 in
+end 
+
+
+ex.2: you are the blue team?SOC guys for pogo sites:
+Bet10.com open only SSH:22, telnet:23
+Bet11.com open only dns:53, https: 443 -- FP2
+
+
+Config t
+No ip access-list extended FP2
+ip access-list extended FP2
+permit tcp any host bet10.com eq 22
+permit tcp any host bet10.com eq 23
+permit icmp any host bet10.com
+permit tcp any host bet11.com eq 53
+permit tcp any host bet11.com eq 443
+permit tcp any host bet11.com eq 22
+end
+
+Fp.3: you are the blue team/SOC guys for pogo sites:
+bet10.com open only sccp: 2000, ping
+bet11.com open only sip: 5060, 5061
+
+Config t
+No ip access-list extended FP3
+ip access-list extended FP3
+permit tcp any host bet10.com eq 2000
+permit tcp any host bet10.com eq ping
+permit icmp any host bet10.com
+permit tcp any host bet11.com eq 5060
+permit tcp any host bet11.com eq 5061
+permit tcp any host bet11.com eq 22
+end
+
+Fp.4: you are the blue team/SOC guys for pogo sites:
+bet10.com open only https
+bet11.com open only ssh
+
+Config t
+No ip access-list extended FP4
+ip access-list extended FP4
+permit tcp any host bet10.com eq https
+permit icmp any host bet10.com
+permit tcp any host bet11.com eq ssh
+end
+
+FP5:you are the blue team/SOC guys for pogo sites:
+bet10.com is VOIP only server: ping,h323,sccp,sip:1720,2000,5060
+bet11.com is gambling server: ping,ssh,http,https. = 8linex
+
+Config t
+No ip access-list extended FP5
+ip access-list extended FP5
+permit icmp any host bet10.com eq 1720
+permit icmp any host bet10.com eq 2000
+permit icmp any host bet10.com eq 5060
+permit tcp any host bet10.com
+permit tcp any host bet11.com eq ssh
+end
+config t
+int gi 3
+ No ip access-group FP5 in
+end 
+
+
+
+------
+
+
+--------
+
+inside:                NAT/PAT         outside
+bet10.com 192.168.103.10:80           betlog.com 208.8.8.8.69:80    
+bet10.com 192.168.103.10:443          betlog.com 208.8.8.69:8443  
+bet11.com 192.168.103.11:80           betlog.com 208.8.8.8.69:8080    
+bet11.com 192.168.103.11:443          betlog.com 208.8.8.69:443  
+
+
+config t
+no access-list 8
+access-list 8 permit host bet10.com
+access-list 8 permit host bet11.com
+Int Gi 3
+ ip nat Inside
+Int gi 1
+ ip nat Outside
+IP Nat inside source static tcp 192.168.103.10 80 208.8.8.69 80
+IP Nat inside source static tcp 192.168.103.10 443 208.8.8.69 8443
+IP Nat inside source static tcp 192.168.103.11 80 208.8.8.69 8080
+IP Nat inside source static tcp 192.168.103.11 443 208.8.8.69 443
+IP nat inside source list 8 int gi 1 Overload
+end
+show ip nat translation
+
+
+
